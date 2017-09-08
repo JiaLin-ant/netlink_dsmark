@@ -34,6 +34,11 @@ type HtbClassAttrs struct {
 	Prio    uint32
 }
 
+type DsmarkClassAttrs struct {
+	Mask   uint8
+	Value  uint8
+}
+
 func (q HtbClassAttrs) String() string {
 	return fmt.Sprintf("{Rate: %d, Ceil: %d, Buffer: %d, Cbuffer: %d}", q.Rate, q.Ceil, q.Buffer, q.Cbuffer)
 }
@@ -50,6 +55,12 @@ type HtbClass struct {
 	Prio    uint32
 }
 
+type DsmarkClass struct {
+	ClassAttrs
+	Mask    uint8
+	Value   uint8
+}
+
 func (q HtbClass) String() string {
 	return fmt.Sprintf("{Rate: %d, Ceil: %d, Buffer: %d, Cbuffer: %d}", q.Rate, q.Ceil, q.Buffer, q.Cbuffer)
 }
@@ -57,11 +68,17 @@ func (q HtbClass) String() string {
 func (q *HtbClass) Attrs() *ClassAttrs {
 	return &q.ClassAttrs
 }
+func (q *DsmarkClass) Attrs() *ClassAttrs {
+	return &q.ClassAttrs
+}
 
 func (q *HtbClass) Type() string {
 	return "htb"
 }
 
+func (q *DsmarkClass) Type() string {
+	return "dsmark"
+}
 // GenericClass classes represent types that are not currently understood
 // by this netlink library.
 type GenericClass struct {

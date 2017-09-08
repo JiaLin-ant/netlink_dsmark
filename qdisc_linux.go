@@ -148,10 +148,14 @@ func (h *Handle) qdiscModify(cmd, flags int, qdisc Qdisc) error {
 	if cmd != syscall.RTM_DELQDISC {
 		if err := qdiscPayload(req, qdisc); err != nil {
 			return err
+                        fmt.Println("add payload err")
 		}
 	}
 
 	_, err := req.Execute(syscall.NETLINK_ROUTE, 0)
+        if err!=nil {
+           fmt.Println("execute err")
+}
 	return err
 }
 
@@ -172,7 +176,7 @@ func qdiscPayload(req *nl.NetlinkRequest, qdisc Qdisc) error {
 		opt.Peakrate.Rate = uint32(tbf.Peakrate)
 		opt.Limit = tbf.Limit
 		opt.Buffer = tbf.Buffer
-		nl.NewRtAttrChild(options, nl.TCA_TBF_PARMS, opt.Serialize())
+		nl.NewRtAttrChild(options, nl.TCA_TBF_PARMS, opt.Serialize())//1
 		if tbf.Rate >= uint64(1<<32) {
 			nl.NewRtAttrChild(options, nl.TCA_TBF_RATE64, nl.Uint64Attr(tbf.Rate))
 		}
@@ -182,7 +186,11 @@ func qdiscPayload(req *nl.NetlinkRequest, qdisc Qdisc) error {
 		if tbf.Peakrate > 0 {
 			nl.NewRtAttrChild(options, nl.TCA_TBF_PBURST, nl.Uint32Attr(tbf.Minburst))
 		}
-	} else if htb, ok := qdisc.(*Htb); ok {
+	} else if dsmark, ok :=qdisc.(*Dsmark); ok {
+	nl.NewRtAttrChild(options, nl.TCA_DSMARK_INDICES, nl.Uint16Attr(dsmark.Indices))
+	nl.NewRtAttrChild(options, nl.TCA_DSMARK_DEFAULT_INDEX, nl.Uint16Attr(dsmark.Default_index))
+//	nl.NewRtAttrChild(options, nl.TCA_DSMARK_SET_TC_INDEX, nl.Uint32Attr(dsmark.Set_tc_index))
+        }else if htb, ok := qdisc.(*Htb); ok {
 		opt := nl.TcHtbGlob{}
 		opt.Version = htb.Version
 		opt.Rate2Quantum = htb.Rate2Quantum
@@ -190,7 +198,7 @@ func qdiscPayload(req *nl.NetlinkRequest, qdisc Qdisc) error {
 		// TODO: Handle Debug properly. For now default to 0
 		opt.Debug = htb.Debug
 		opt.DirectPkts = htb.DirectPkts
-		nl.NewRtAttrChild(options, nl.TCA_HTB_INIT, opt.Serialize())
+		nl.NewRtAttrChild(options, nl.TCA_HTB_INIT, opt.Serialize())//2
 		// nl.NewRtAttrChild(options, nl.TCA_HTB_DIRECT_QLEN, opt.Serialize())
 	} else if netem, ok := qdisc.(*Netem); ok {
 		opt := nl.TcNetemQopt{}

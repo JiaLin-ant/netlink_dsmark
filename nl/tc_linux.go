@@ -360,6 +360,17 @@ const (
 	TCA_HTB_MAX = TCA_HTB_CEIL64
 )
 
+const (
+	TCA_DSMARK_UNSPEC = iota
+	TCA_DSMARK_INDICES
+	TCA_DSMARK_DEFAULT_INDEX
+	TCA_DSMARK_SET_TC_INDEX
+	TCA_DSMARK_MASK
+	TCA_DSMARK_VALUE
+	__TCA_DSMARK_MAX
+)
+
+
 //struct tc_htb_opt {
 //	struct tc_ratespec	rate;
 //	struct tc_ratespec	ceil;

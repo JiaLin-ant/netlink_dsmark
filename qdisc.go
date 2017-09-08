@@ -115,6 +115,15 @@ type Htb struct {
 	DirectPkts   uint32
 }
 
+type Dsmark struct {
+        QdiscAttrs
+	Indices         uint16
+	Default_index   uint16
+	Set_tc_index    uint32
+        //Tca_dsmark_mask uint8
+        //Tca_dsmark_value uint8
+	}
+
 func NewHtb(attrs QdiscAttrs) *Htb {
 	return &Htb{
 		QdiscAttrs:   attrs,
@@ -125,14 +134,32 @@ func NewHtb(attrs QdiscAttrs) *Htb {
 		DirectPkts:   0,
 	}
 }
+func NewDsmark(attrs QdiscAttrs) *Dsmark {
+	return &Dsmark{
+	QdiscAttrs:   attrs,
+        Indices:        64,
+        Default_index:  63,		
+	Set_tc_index:    0,
+        //Tca_dsmark_mask: 10,
+        //Tca_dsmark_value: 20,
+	}
+}
+
 
 func (qdisc *Htb) Attrs() *QdiscAttrs {
+	return &qdisc.QdiscAttrs
+}
+func (qdisc *Dsmark) Attrs() *QdiscAttrs {
 	return &qdisc.QdiscAttrs
 }
 
 func (qdisc *Htb) Type() string {
 	return "htb"
 }
+func(qdisc *Dsmark) Type() string {
+	return "dsmark"
+}
+
 
 // Netem is a classless qdisc that rate limits based on tokens
 

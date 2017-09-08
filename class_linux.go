@@ -3,7 +3,7 @@ package netlink
 import (
 	"errors"
 	"syscall"
-
+        "fmt"
 	"github.com/vishvananda/netlink/nl"
 )
 
@@ -40,6 +40,16 @@ func NewHtbClass(attrs ClassAttrs, cattrs HtbClassAttrs) *HtbClass {
 		Prio:       0,
 	}
 }
+
+func NewDsmarkClass(attrs ClassAttrs, cattrs DsmarkClassAttrs) *DsmarkClass {
+	mask :=cattrs.Mask
+	value :=cattrs.Value
+	return &DsmarkClass{
+	ClassAttrs: attrs,
+	Mask:       uint8(mask),
+	Value:      uint8(value),
+    }
+}	
 
 // ClassDel will delete a class from the system.
 // Equivalent to: `tc class del $class`
@@ -153,6 +163,10 @@ func classPayload(req *nl.NetlinkRequest, class Class) error {
 		nl.NewRtAttrChild(options, nl.TCA_HTB_PARMS, opt.Serialize())
 		nl.NewRtAttrChild(options, nl.TCA_HTB_RTAB, SerializeRtab(rtab))
 		nl.NewRtAttrChild(options, nl.TCA_HTB_CTAB, SerializeRtab(ctab))
+	}else if dsmark, ok := class.(*DsmarkClass); ok {
+                fmt.Println("it's dsmark")
+		nl.NewRtAttrChild(options, nl.TCA_DSMARK_MASK, nl.Uint8Attr(dsmark.Mask ))
+		nl.NewRtAttrChild(options, nl.TCA_DSMARK_VALUE,nl.Uint8Attr(dsmark.Value))
 	}
 	req.AddData(options)
 	return nil
